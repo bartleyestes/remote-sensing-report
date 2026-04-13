@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Remote Sensing Weekly Summary</title>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:         #ECEEF0;
+    --surface:    #F6F7F8;
+    --surface2:   #ECEEF0;
+    --border:     #D8DCDF;
+    --border2:    #C8CDD2;
+    --text:       #1E2225;
+    --muted:      #6B7680;
+    --muted2:     #9BA5AE;
+    --accent:     #4A8C5C;
+    --accent-dim: #4A8C5C20;
+    --green:      #5AAF72;
+    --green-bg:   #5AAF7216;
+    --green-dim:  #4A9960;
+    --amber:      #C4922A;
+    --amber-bg:   #C4922A16;
+    --red:        #C45050;
+    --red-bg:     #C4505016;
+  }
+
+  [data-theme="dark"] {
+    --bg:         #0F1512;
+    --surface:    #161D19;
+    --surface2:   #1C2620;
+    --border:     #243028;
+    --border2:    #2E3D33;
+    --text:       #E2EDE5;
+    --muted:      #6A8870;
+    --muted2:     #435249;
+    --accent:     #5AAF72;
+    --accent-dim: #5AAF7220;
+    --green:      #6DBF85;
+    --green-bg:   #6DBF8516;
+    --green-dim:  #5AAF72;
+    --amber:      #D4A240;
+    --amber-bg:   #D4A24016;
+    --red:        #D46060;
+    --red-bg:     #D4606016;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    padding: 48px 24px 80px;
+  }
+
+  .page { max-width: 920px; margin: 0 auto; }
+
+  /* ── HEADER ── */
+  .report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 36px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .header-left { display: flex; flex-direction: column; gap: 6px; }
+
+  .header-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .report-header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+
+  .report-meta { text-align: right; }
+
+  .report-meta .date {
+    font-family: 'Cascadia Code', 'Consolas', 'SF Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  .report-meta .period-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted2);
+    margin-top: 5px;
+  }
+
+  /* ── TOP ACTIONS ── */
+  .top-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .print-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+
+  .print-btn:hover { color: var(--text); border-color: var(--accent); background: var(--accent-dim); }
+
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .theme-toggle:hover { color: var(--text); border-color: var(--accent); background: var(--accent-dim); }
+
+  .toggle-track {
+    width: 32px;
+    height: 18px;
+    border-radius: 99px;
+    background: var(--border2);
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  .toggle-track.on { background: var(--accent); }
+
+  .toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--text);
+    transition: transform 0.2s;
+  }
+
+  .toggle-track.on .toggle-thumb { transform: translateX(14px); }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .filter-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    color: var(--muted2);
+    white-space: nowrap;
+  }
+
+  .filter-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .filter-chip {
+    padding: 5px 14px;
+    border-radius: 99px;
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--muted);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .filter-chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .filter-chip.active {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ── SUMMARY BAR ── */
+  .summary-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .summary-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .chip-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+  .chip-count {
+    font-family: 'Cascadia Code', 'Consolas', 'SF Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1;
+    margin-left: auto;
+    color: var(--text);
+  }
+
+  /* ── PROJECTS LIST ── */
+  .projects-list { display: flex; flex-direction: column; gap: 14px; }
+
+  .project-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .project-card:hover {
+    border-color: var(--border2);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+  }
+
+  .card-top { display: flex; align-items: stretch; }
+  .status-stripe { width: 4px; flex-shrink: 0; }
+
+  .card-header {
+    flex: 1;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .project-name {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .status-badge {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+  }
+
+  .status-on-track { background: var(--green-bg);  color: var(--green);  border-color: #5AAF7230; }
+  .status-at-risk   { background: var(--amber-bg);  color: var(--amber);  border-color: #C4922A30; }
+  .status-delayed   { background: var(--red-bg);    color: var(--red);    border-color: #C4505030; }
+
+  .assignee { font-size: 12px; color: var(--muted); font-weight: 500; }
+
+  /* PROGRESS */
+  .progress-section {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .progress-label {
+    font-family: 'Cascadia Code', 'Consolas', 'SF Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    min-width: 50px;
+    color: var(--text);
+  }
+
+  .progress-bar-wrap {
+    flex: 1;
+    height: 5px;
+    background: var(--border2);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  .due-date-inline {
+    font-family: 'Cascadia Code', 'Consolas', 'SF Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .due-date-inline.overdue { color: var(--red); }
+  .due-date-inline.soon    { color: var(--amber); }
+
+  /* DETAILS GRID */
+  .card-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .detail-cell {
+    padding: 13px 20px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .detail-cell:nth-child(3n)        { border-right: none; }
+  .detail-cell:nth-last-child(-n+3) { border-bottom: none; }
+
+  .detail-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    color: var(--muted2);
+    margin-bottom: 5px;
+  }
+
+  .detail-value { font-size: 13px; line-height: 1.5; color: var(--text); }
+  .blocker-value { color: var(--red); }
+  .no-blocker    { color: var(--green-dim); }
+  .due-overdue   { color: var(--red); }
+
+  /* NOTES SECTION */
+  .card-notes {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .card-notes .detail-label { margin-bottom: 7px; }
+
+  .card-notes-text {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .card-notes-empty {
+    font-size: 13px;
+    color: var(--muted2);
+    font-style: italic;
+  }
+
+  /* ADD BUTTON */
+  .add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 18px;
+    margin-top: 14px;
+    background: none;
+    border: 1px dashed var(--border2);
+    border-radius: 12px;
+    color: var(--muted2);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .add-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  /* CARD ACTIONS */
+  .card-actions { display: flex; gap: 6px; }
+
+  .icon-btn {
+    background: none;
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 4px 9px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    transition: all 0.15s;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .icon-btn.del:hover { border-color: var(--red); color: var(--red); }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 64px 20px; color: var(--muted2); }
+  .empty-state .big {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--border2);
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(6px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 540px;
+    max-height: 92vh;
+    overflow-y: auto;
+    animation: slideUp 0.2s ease;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal-header {
+    padding: 22px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 1;
+  }
+
+  .modal-title { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
+
+  .modal-close {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 18px;
+    line-height: 1;
+    padding: 4px 9px;
+    transition: all 0.15s;
+  }
+
+  .modal-close:hover { color: var(--text); }
+
+  .modal-body {
+    padding: 20px 24px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+
+  .field label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.11em;
+    color: var(--muted);
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    padding: 10px 13px;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    background: var(--surface2);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .field input[type="date"] { color-scheme: dark; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+  .field select option { background: var(--surface2); }
+  .field textarea { resize: vertical; min-height: 68px; }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .range-wrap { display: flex; align-items: center; gap: 12px; }
+
+  .range-wrap input[type="range"] {
+    flex: 1;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    accent-color: var(--accent);
+  }
+
+  .range-val {
+    font-family: 'Cascadia Code', 'Consolas', 'SF Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    min-width: 40px;
+    text-align: right;
+    color: var(--text);
+  }
+
+  .modal-divider {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted2);
+    padding-top: 4px;
+    padding-bottom: 2px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--border);
+    position: sticky;
+    bottom: 0;
+    background: var(--surface);
+  }
+
+  .btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+
+  .btn:hover { opacity: 0.85; }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-ghost { background: var(--surface2); border: 1px solid var(--border2); color: var(--muted); }
+
+  @media print {
+    body { padding: 20px; background: #fff; color: #000; }
+    .top-actions, .add-btn, .card-actions { display: none !important; }
+    .project-card { break-inside: avoid; border: 1px solid #ddd !important; background: #fff !important; }
+    .modal-overlay { display: none !important; }
+    :root {
+      --bg:#fff; --surface:#fff; --surface2:#f5f5f5;
+      --border:#ddd; --border2:#ccc;
+      --text:#111; --muted:#555; --muted2:#888;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .report-header { flex-direction: column; align-items: flex-start; gap: 14px; }
+    .report-header h1 { font-size: 28px; }
+    .summary-chip { min-width: calc(50% - 5px); }
+    .card-details { grid-template-columns: 1fr 1fr; }
+    .detail-cell:nth-child(3n)        { border-right: 1px solid var(--border); }
+    .detail-cell:nth-child(2n)        { border-right: none; }
+    .detail-cell:nth-last-child(-n+3) { border-bottom: 1px solid var(--border); }
+    .detail-cell:nth-last-child(-n+2) { border-bottom: none; }
+    .field-row { grid-template-columns: 1fr; }
+    .header-right { flex-wrap: wrap; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="report-header">
+    <div class="header-left">
+      <span class="header-eyebrow">Remote Sensing</span>
+      <h1>Weekly Summary</h1>
+    </div>
+    <div class="report-meta">
+      <div class="date" id="reportDate"></div>
+      <div class="period-label">Internal Use Only</div>
+    </div>
+  </div>
+
+  <div class="top-actions">
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+      <div class="toggle-track" id="toggleTrack"><div class="toggle-thumb"></div></div>
+      Dark Mode
+    </button>
+    <button class="print-btn" onclick="window.print()">⎙ Export PDF</button>
+  </div>
+
+  <div class="filter-bar">
+    <span class="filter-label">Filter by PM</span>
+    <div class="filter-chips" id="filterChips">
+      <button class="filter-chip active" data-pm="all" onclick="setFilter('all')">All PMs</button>
+    </div>
+  </div>
+
+  <div class="summary-bar">
+    <div class="summary-chip">
+      <span class="chip-dot" style="background:var(--muted)"></span>
+      Total Projects <span class="chip-count" id="countTotal">0</span>
+    </div>
+    <div class="summary-chip">
+      <span class="chip-dot" style="background:var(--green)"></span>
+      On Track <span class="chip-count" id="countOnTrack">0</span>
+    </div>
+    <div class="summary-chip">
+      <span class="chip-dot" style="background:var(--amber)"></span>
+      At Risk <span class="chip-count" id="countAtRisk">0</span>
+    </div>
+    <div class="summary-chip">
+      <span class="chip-dot" style="background:var(--red)"></span>
+      Delayed <span class="chip-count" id="countDelayed">0</span>
+    </div>
+  </div>
+
+  <div class="projects-list" id="projectsList">
+    <div class="empty-state">
+      <div class="big">No projects yet</div>
+      <div>Add your first project below to get started.</div>
+    </div>
+  </div>
+
+  <button class="add-btn" onclick="openModal()">+ Add Project</button>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Add Project</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="field">
+        <label>Project Name</label>
+        <input type="text" id="fName" placeholder="e.g. City of Austin — Pavement Assessment">
+      </div>
+
+      <div class="modal-divider">People</div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Project Manager</label>
+          <input type="text" id="fManager" placeholder="PM name">
+        </div>
+        <div class="field">
+          <label>Team Members Assigned</label>
+          <input type="text" id="fAssignee" placeholder="Name or team">
+        </div>
+      </div>
+
+      <div class="modal-divider">Status &amp; Schedule</div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Status</label>
+          <select id="fStatus">
+            <option value="On Track">On Track</option>
+            <option value="At Risk">At Risk</option>
+            <option value="Delayed">Delayed</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Internal Due Date</label>
+          <input type="date" id="fDueDate">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>% Complete — <span id="pctLabel">0%</span></label>
+        <div class="range-wrap">
+          <input type="range" id="fPct" min="0" max="100" value="0"
+            oninput="document.getElementById('pctLabel').textContent = this.value + '%'">
+        </div>
+      </div>
+
+      <div class="modal-divider">Work Details</div>
+
+      <div class="field">
+        <label>Current Task</label>
+        <input type="text" id="fCurrentTask" placeholder="e.g. QC point cloud data">
+      </div>
+
+      <div class="field">
+        <label>Next Milestone</label>
+        <input type="text" id="fMilestone" placeholder="e.g. Deliver LiDAR scans — Apr 18">
+      </div>
+
+      <div class="field">
+        <label>Blockers / Issues</label>
+        <textarea id="fBlockers" placeholder="Describe any blockers, or leave blank if none"></textarea>
+      </div>
+
+      <div class="field">
+        <label>Notes</label>
+        <textarea id="fNotes" placeholder="Any additional context, links, or relevant info for this project…" style="min-height:100px"></textarea>
+      </div>
+
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProject()">Save Project</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwaIrRlouIgpbWmTDnzhL9bDPVL9z-YALwO0pPOjVjt7bPnok1ZIG4HrKkd5H9jENnP/exec';
+
+  let projects   = [];
+  let editingId = null;
+  let activeFilter = 'all';
+
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+  async function save() {
+    try {
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projects })
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const txt = await res.text();
+      console.log('Save OK:', txt);
+    } catch (e) {
+      console.error('Save failed:', e);
+      // Retry once
+      try {
+        await new Promise(r => setTimeout(r, 1000));
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ projects })
+        });
+        console.log('Save retry OK');
+      } catch (e2) {
+        console.error('Save retry failed:', e2);
+      }
+    }
+  }
+
+  async function loadProjects() {
+    setLoading(true);
+    try {
+      const res  = await fetch(SCRIPT_URL + '?t=' + Date.now() + '&nocache=' + Math.random(), {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache, no-store', 'Pragma': 'no-cache' }
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(`HTTP ${res.status}: ${txt}`);
+      }
+      const data = await res.json();
+      projects   = data.projects || [];
+    } catch (e) {
+      console.error('Load failed:', e);
+      setError(e.message);
+      projects = [];
+    }
+    setLoading(false);
+    render();
+  }
+
+  function setLoading(on) {
+    const list = document.getElementById('projectsList');
+    if (on) list.innerHTML = '<div class="empty-state"><div class="big" style="font-size:16px;color:var(--muted)">Loading projects…</div></div>';
+  }
+
+  function setError(msg) {
+    const list = document.getElementById('projectsList');
+    list.innerHTML = `<div class="empty-state">
+      <div class="big" style="font-size:15px;color:var(--red)">⚠ Could not load projects</div>
+      <div style="color:var(--muted);font-size:12px;margin-top:8px;font-family:monospace">${msg}</div>
+      <div style="color:var(--muted);margin-top:8px">Check your API key and Bin ID, or ensure the bin is not set to Private without CORS enabled.</div>
+    </div>`;
+  }
+
+  function setFilter(pm) {
+    activeFilter = pm;
+    document.querySelectorAll('.filter-chip').forEach(c => {
+      c.classList.toggle('active', c.dataset.pm === pm);
+    });
+    render();
+  }
+
+  function rebuildFilterChips() {
+    const pms = [...new Set(projects.map(p => p.manager).filter(Boolean))].sort();
+    const container = document.getElementById('filterChips');
+    container.innerHTML = `<button class="filter-chip ${activeFilter === 'all' ? 'active' : ''}" data-pm="all" onclick="setFilter('all')">All PMs</button>`;
+    pms.forEach(pm => {
+      const btn = document.createElement('button');
+      btn.className = 'filter-chip' + (activeFilter === pm ? ' active' : '');
+      btn.dataset.pm = pm;
+      btn.textContent = pm;
+      btn.onclick = () => setFilter(pm);
+      container.appendChild(btn);
+    });
+    // Reset filter if the active PM no longer exists
+    if (activeFilter !== 'all' && !pms.includes(activeFilter)) {
+      activeFilter = 'all';
+      container.querySelector('[data-pm="all"]').classList.add('active');
+    }
+  }
+
+  function statusClass(s) {
+    if (s === 'On Track') return 'status-on-track';
+    if (s === 'At Risk')  return 'status-at-risk';
+    return 'status-delayed';
+  }
+
+  function stripeColor(s) {
+    const dark = document.documentElement.dataset.theme === 'dark';
+    if (s === 'On Track') return dark ? '#6DBF85' : '#5AAF72';
+    if (s === 'At Risk')  return dark ? '#D4A240' : '#C4922A';
+    return dark ? '#D46060' : '#C45050';
+  }
+
+  function barColor(s) { return stripeColor(s); }
+
+  function toggleTheme() {
+    const isDark = document.documentElement.dataset.theme === 'dark';
+    document.documentElement.dataset.theme = isDark ? '' : 'dark';
+    document.getElementById('toggleTrack').classList.toggle('on', !isDark);
+    localStorage.setItem('rsTheme', isDark ? 'light' : 'dark');
+    render();
+  }
+
+  // Restore saved theme on load
+  const savedTheme = localStorage.getItem('rsTheme');
+  if (savedTheme === 'dark') {
+    document.documentElement.dataset.theme = 'dark';
+    document.getElementById('toggleTrack').classList.add('on');
+  }
+
+  function formatDate(iso) {
+    if (!iso) return null;
+    const [y, m, d] = iso.split('-');
+    return new Date(+y, +m - 1, +d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function dueDateStatus(iso) {
+    if (!iso) return '';
+    const today = new Date(); today.setHours(0,0,0,0);
+    const due = new Date(iso + 'T00:00:00');
+    const diff = (due - today) / 86400000;
+    if (diff < 0)  return 'overdue';
+    if (diff <= 7) return 'soon';
+    return '';
+  }
+
+  function render() {
+    rebuildFilterChips();
+    const filtered = activeFilter === 'all' ? projects : projects.filter(p => p.manager === activeFilter);
+    const list = document.getElementById('projectsList');
+    const counts = { total: filtered.length, onTrack: 0, atRisk: 0, delayed: 0 };
+    filtered.forEach(p => {
+      if (p.status === 'On Track') counts.onTrack++;
+      else if (p.status === 'At Risk') counts.atRisk++;
+      else counts.delayed++;
+    });
+
+    document.getElementById('countTotal').textContent   = counts.total;
+    document.getElementById('countOnTrack').textContent = counts.onTrack;
+    document.getElementById('countAtRisk').textContent  = counts.atRisk;
+    document.getElementById('countDelayed').textContent = counts.delayed;
+
+    if (filtered.length === 0) {
+      list.innerHTML = `<div class="empty-state">
+        <div class="big">${activeFilter === 'all' ? 'No projects yet' : 'No projects for ' + escHtml(activeFilter)}</div>
+        <div>${activeFilter === 'all' ? 'Add your first project below to get started.' : 'Try selecting a different PM or add a project.'}</div>
+      </div>`;
+      return;
+    }
+
+    list.innerHTML = filtered.map(p => {
+      const dueFmt    = formatDate(p.dueDate);
+      const dueStatus = dueDateStatus(p.dueDate);
+      const dueBadge  = dueFmt
+        ? `<span class="due-date-inline ${dueStatus}">Due ${dueFmt}${dueStatus === 'overdue' ? ' ⚠' : ''}</span>`
+        : '';
+
+      return `
+      <div class="project-card">
+        <div class="card-top">
+          <div class="status-stripe" style="background:${stripeColor(p.status)}"></div>
+          <div class="card-header">
+            <div class="project-name">${escHtml(p.name)}</div>
+            <div class="header-right">
+              <span class="status-badge ${statusClass(p.status)}">${p.status}</span>
+              ${p.assignee ? `<span class="assignee">· ${escHtml(p.assignee)}</span>` : ''}
+              <div class="card-actions">
+                <button class="icon-btn" onclick="editProject('${p.id}')">Edit</button>
+                <button class="icon-btn del" onclick="confirmDelete(this, '${p.id}')">Remove</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="progress-section">
+          <div class="progress-label">${p.pct}%</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" style="width:${p.pct}%;background:${barColor(p.status)}"></div>
+          </div>
+          ${dueBadge}
+        </div>
+        <div class="card-details">
+          <div class="detail-cell">
+            <div class="detail-label">Project Manager</div>
+            <div class="detail-value">${escHtml(p.manager || '—')}</div>
+          </div>
+          <div class="detail-cell">
+            <div class="detail-label">Team Members</div>
+            <div class="detail-value">${escHtml(p.assignee || '—')}</div>
+          </div>
+          <div class="detail-cell">
+            <div class="detail-label">Internal Due Date</div>
+            <div class="detail-value ${dueStatus === 'overdue' ? 'due-overdue' : ''}">${escHtml(dueFmt || '—')}</div>
+          </div>
+          <div class="detail-cell">
+            <div class="detail-label">Current Task</div>
+            <div class="detail-value">${escHtml(p.currentTask || '—')}</div>
+          </div>
+          <div class="detail-cell">
+            <div class="detail-label">Next Milestone</div>
+            <div class="detail-value">${escHtml(p.milestone || '—')}</div>
+          </div>
+          <div class="detail-cell">
+            <div class="detail-label">Blockers / Issues</div>
+            <div class="detail-value ${p.blockers ? 'blocker-value' : 'no-blocker'}">${escHtml(p.blockers || 'None')}</div>
+          </div>
+        </div>
+        <div class="card-notes">
+          <div class="detail-label">Notes</div>
+          ${p.notes
+            ? `<div class="card-notes-text">${escHtml(p.notes)}</div>`
+            : `<div class="card-notes-empty">No notes added yet.</div>`}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function openModal(id) {
+    editingId = id || null;
+    const p = id ? projects.find(x => x.id === id) : null;
+    document.getElementById('modalTitle').textContent   = p ? 'Edit Project' : 'Add Project';
+    document.getElementById('fName').value              = p ? p.name        : '';
+    document.getElementById('fManager').value           = p ? p.manager     : '';
+    document.getElementById('fAssignee').value          = p ? p.assignee    : '';
+    document.getElementById('fStatus').value            = p ? p.status      : 'On Track';
+    document.getElementById('fDueDate').value           = p ? (p.dueDate || '') : '';
+    document.getElementById('fPct').value               = p ? p.pct         : 0;
+    document.getElementById('pctLabel').textContent     = (p ? p.pct : 0) + '%';
+    document.getElementById('fCurrentTask').value       = p ? p.currentTask : '';
+    document.getElementById('fMilestone').value         = p ? p.milestone   : '';
+    document.getElementById('fBlockers').value          = p ? p.blockers    : '';
+    document.getElementById('fNotes').value             = p ? (p.notes || '') : '';
+    document.getElementById('modalOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('fName').focus(), 100);
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    editingId = null;
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  }
+
+  async function saveProject() {
+    const name = document.getElementById('fName').value.trim();
+    if (!name) { alert('Please enter a project name.'); return; }
+
+    const data = {
+      id:          editingId || uid(),
+      name,
+      manager:     document.getElementById('fManager').value.trim(),
+      assignee:    document.getElementById('fAssignee').value.trim(),
+      status:      document.getElementById('fStatus').value,
+      dueDate:     document.getElementById('fDueDate').value,
+      pct:         parseInt(document.getElementById('fPct').value),
+      currentTask: document.getElementById('fCurrentTask').value.trim(),
+      milestone:   document.getElementById('fMilestone').value.trim(),
+      blockers:    document.getElementById('fBlockers').value.trim(),
+      notes:       document.getElementById('fNotes').value.trim(),
+    };
+
+    if (editingId) {
+      projects[projects.findIndex(p => p.id === editingId)] = data;
+    } else {
+      projects.push(data);
+    }
+
+    const saveBtn = document.querySelector('.btn-primary');
+    if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; }
+    
+    // Render immediately with local data so user sees the result right away
+    closeModal();
+    render();
+    
+    // Save to server in background
+    await save();
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save Project'; }
+    
+    // Silently sync from server to confirm save without blanking the UI
+    try {
+      await new Promise(r => setTimeout(r, 600));
+      const res = await fetch(SCRIPT_URL + '?t=' + Date.now() + '&nocache=' + Math.random(), {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache, no-store', 'Pragma': 'no-cache' }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.projects && data.projects.length > 0) {
+          projects = data.projects;
+          render();
+        }
+      }
+    } catch(e) {
+      console.warn('Background sync failed, local data shown:', e);
+    }
+  }
+
+  function editProject(id) { openModal(id); }
+
+  function confirmDelete(btn, id) {
+    if (btn.dataset.confirming) {
+      deleteProject(id);
+    } else {
+      btn.dataset.confirming = true;
+      btn.textContent = 'Sure?';
+      btn.style.borderColor = 'var(--red)';
+      btn.style.color = 'var(--red)';
+      setTimeout(() => {
+        if (btn.dataset.confirming) {
+          delete btn.dataset.confirming;
+          btn.textContent = 'Remove';
+          btn.style.borderColor = '';
+          btn.style.color = '';
+        }
+      }, 2500);
+    }
+  }
+
+  async function deleteProject(id) {
+    projects = projects.filter(p => p.id !== id);
+    await save(); render();
+  }
+
+  const now = new Date();
+  document.getElementById('reportDate').textContent =
+    now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  loadProjects();
+</script>
+</body>
+</html>
